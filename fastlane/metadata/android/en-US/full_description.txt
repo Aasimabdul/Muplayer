@@ -1,0 +1,14 @@
+**MuPlayer** is a highly customizable, locally-hosted Android music player built with modern Jetpack Compose. It features an exclusive, premium **Liquid Glass** aesthetic—utilizing rich translucency, soft glowing borders, and dynamic ambient background lighting that seamlessly adapts to the album art of the music you are currently playing.
+
+### 🎧 Key Features:
+* **Stunning UI:** Experience an interface like no other. Beautiful layered glass surfaces, physics-based bounce animations, and 10 dynamic color themes to match your personal style.
+* **Smart Playlists:** Automatically keeps track of your **Most Played Songs** and **Liked Songs** directly on your Playlists dashboard.
+* **Custom 5-Band Equalizer:** Fine-tune your audio experience with a custom Equalizer and Bass Booster.
+* **Interactive Waveform Timeline:** Scrub through your music with an elegant, dynamically generated animated sine-wave timeline.
+* **Dynamic Widgets:** The home screen widgets natively extract colors from your current playing track, coloring your Android home screen perfectly to the vibe of your music.
+* **Floating Mini-Player:** Effortlessly control your music queue with an iPhone Dynamic Island-style floating pill directly above your bottom navigation.
+* **M3U Playlist Import:** Bulk import your favorite local `.m3u` or `.m3u8` playlists with smart file resolution.
+* **Library Multi-Select:** Select, manage, delete, or add dozens of songs to playlists simultaneously.
+* **Sleep Timer & Crossfade:** Drift off to sleep with a customizable timer, and enjoy smooth, gapless-like crossfading between your tracks.
+
+Enjoy a truly premium, ad-free, completely offline music experience.

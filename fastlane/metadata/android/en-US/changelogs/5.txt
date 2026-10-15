@@ -1,0 +1,9 @@
+* Stunning "Liquid Glass" UI Redesign: The entire app has been refreshed with a premium "Liquid Glass" aesthetic that dynamically adapts to all 10 custom color themes!
+* Floating Dynamic Mini-Player: The mini-player on the main screens elegantly hovers above the bottom navigation bar like a pill.
+* 5-Band Custom Equalizer & Bass Booster: Fine-tune your audio exactly how you like.
+* Animated Waveform Timeline: Scrub through your music with an elegant, animated sine-wave timeline.
+* M3U Playlist Imports: Directly import your .m3u and .m3u8 playlist files into the app.
+* Library Multi-Select Mode: Long-press any song in the Library to batch-delete or bulk-add songs to playlists.
+* Smart Playlists: Automatically generates smart virtual playlists for your "Liked Songs" and "Most Played Songs".
+* Repeat Button in Notifications: Toggle your Repeat settings directly from your Android lock screen and notification shade!
+* Numerous bug fixes for crossfade playback, play counts accuracy, and Android 13+ permission popups.
