@@ -45,9 +45,9 @@
             android:label="MuPlayer Compact (2×2)">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.example.muplayer.widget.ACTION_PLAY_PAUSE" />
-                <action android:name="com.example.muplayer.widget.ACTION_NEXT" />
-                <action android:name="com.example.muplayer.widget.ACTION_PREVIOUS" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_PLAY_PAUSE" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -60,9 +60,9 @@
             android:label="MuPlayer Wide (4×1)">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.example.muplayer.widget.ACTION_PLAY_PAUSE" />
-                <action android:name="com.example.muplayer.widget.ACTION_NEXT" />
-                <action android:name="com.example.muplayer.widget.ACTION_PREVIOUS" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_PLAY_PAUSE" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -75,9 +75,9 @@
             android:label="MuPlayer Expanded (4×2)">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.example.muplayer.widget.ACTION_PLAY_PAUSE" />
-                <action android:name="com.example.muplayer.widget.ACTION_NEXT" />
-                <action android:name="com.example.muplayer.widget.ACTION_PREVIOUS" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_PLAY_PAUSE" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

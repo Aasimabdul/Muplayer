@@ -13,7 +13,7 @@ import android.widget.RemoteViews
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.example.muplayer.MainActivity
-import com.example.muplayer.R
+import com.simbuild.muplayer.R
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
@@ -30,9 +30,9 @@ import java.util.Locale
 open class MuPlayerWidgetProvider : AppWidgetProvider() {
 
     companion object {
-        const val ACTION_PLAY_PAUSE = "com.example.muplayer.widget.ACTION_PLAY_PAUSE"
-        const val ACTION_NEXT = "com.example.muplayer.widget.ACTION_NEXT"
-        const val ACTION_PREVIOUS = "com.example.muplayer.widget.ACTION_PREVIOUS"
+        const val ACTION_PLAY_PAUSE = "com.simbuild.muplayer.widget.ACTION_PLAY_PAUSE"
+        const val ACTION_NEXT = "com.simbuild.muplayer.widget.ACTION_NEXT"
+        const val ACTION_PREVIOUS = "com.simbuild.muplayer.widget.ACTION_PREVIOUS"
 
         var cachedTitle: String = "MuPlayer"
         var cachedArtist: String = "Tap to play music"

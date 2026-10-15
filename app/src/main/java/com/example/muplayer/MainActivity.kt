@@ -15,7 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.muplayer.ui.screens.MainScreen
 import com.example.muplayer.ui.theme.MuPlayerTheme
 import com.example.muplayer.viewmodel.MusicViewModel
-import com.example.muplayer.R
+import com.simbuild.muplayer.R
 
 class MainActivity : ComponentActivity() {
 

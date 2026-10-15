@@ -97,7 +97,7 @@ class PlaybackService : MediaSessionService() {
     private fun setupNotificationProvider() {
         val provider = MuPlayerNotificationProvider(this)
         
-        provider.setSmallIcon(com.example.muplayer.R.mipmap.muplayer)
+        provider.setSmallIcon(com.simbuild.muplayer.R.mipmap.muplayer)
         setMediaNotificationProvider(provider)
     }
 
