@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background_dark"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:gravity="center">
+
+    <!-- Album Art -->
+    <ImageView
+        android:id="@+id/widget_album_art"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center_horizontal"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_widget_album_placeholder"
+        android:contentDescription="Album Art" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="6dp" />
+
+    <!-- Song Title -->
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="MuPlayer"
+        android:textColor="#FFFFFFFF"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <!-- Artist Name -->
+    <TextView
+        android:id="@+id/widget_artist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:text="Tap to play"
+        android:textColor="#FFA0B2C6"
+        android:textSize="11sp" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="8dp" />
+
+    <!-- Playback Controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_widget_prev"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Previous"
+            android:src="@drawable/ic_widget_previous" />
+
+        <Space
+            android:layout_width="12dp"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/btn_widget_play_pause"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Play/Pause"
+            android:src="@drawable/ic_widget_play" />
+
+        <Space
+            android:layout_width="12dp"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/btn_widget_next"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Next"
+            android:src="@drawable/ic_widget_next" />
+
+    </LinearLayout>
+
+</LinearLayout>

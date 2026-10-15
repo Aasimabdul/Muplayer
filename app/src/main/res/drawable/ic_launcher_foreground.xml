@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 3D Shadow Bevel on Notehead and stem -->
+    <path
+        android:pathData="
+            M 50, 7.5
+            L 48.5, 18
+            L 48.5, 63
+            C 41.5, 60.5  26.5, 62.5  19.5, 71
+            C 13.5, 78  16.5, 87.5  26.5, 90
+            C 36.5, 92.5  49.5, 85.5  55, 71.5
+            L 55, 7.5
+            Z"
+        android:fillColor="#124890" />
+
+    <!-- Main Vibrant Blue Eighth Note -->
+    <path
+        android:pathData="
+            M 50, 7.5
+            C 50, 7.5  63, 8  73, 20
+            C 81, 30  82.5, 48  72, 63
+            C 77.5, 51  76, 37  67.5, 29
+            C 60.5, 22.5  56.5, 24.5  56.5, 34
+            L 56.5, 70
+            C 51, 84  38, 91  28, 88.5
+            C 18, 86  15, 77  21, 70
+            C 28, 62  43, 60  50, 62
+            Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="78"
+                android:startY="10"
+                android:endX="22"
+                android:endY="88"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#2185EE" />
+                <item android:offset="0.5" android:color="#1B6FD0" />
+                <item android:offset="1.0" android:color="#1454B4" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+</vector>
