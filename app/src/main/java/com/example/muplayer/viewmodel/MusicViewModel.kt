@@ -282,6 +282,11 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val allTracks = musicRepository.getAllTracks()
             _tracks.value = allTracks
+
+            // The media service can keep playing while the Activity is recreated.
+            // Reconcile its current item after the library is available so the
+            // Mini Player can resolve the playing media ID back to an AudioTrack.
+            updateCurrentTrack()
         }
     }
 
@@ -304,6 +309,10 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             mediaController = mediaControllerFuture?.get()
             mediaController?.addListener(playerListener)
             _appVolume.value = mediaController?.volume ?: 1f
+
+            // Reconnect to the existing MediaSession without restarting playback.
+            // Its current item may already be playing before this ViewModel connects.
+            updateCurrentTrack()
             updatePlaybackState()
         }, MoreExecutors.directExecutor())
     }
@@ -336,16 +345,31 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun updateCurrentTrack() {
-        val currentMediaId = mediaController?.currentMediaItem?.mediaId
-        if (currentMediaId != null) {
-            val id = currentMediaId.toLongOrNull()
-            _currentTrack.value = _tracks.value.find { it.id == id }
-            _duration.value = mediaController?.duration?.coerceAtLeast(0L) ?: 0L
+        val controller = mediaController
+        val currentMediaItem = controller?.currentMediaItem
+        val currentMediaId = currentMediaItem?.mediaId
+        val id = currentMediaId?.toLongOrNull()
+
+        // Always reconcile the UI state, including when there is no current item.
+        // Leaving the old value untouched can hide or display a stale Mini Player.
+        _currentTrack.value = id?.let { trackId ->
+            _tracks.value.find { it.id == trackId }
+        }
+
+        if (currentMediaItem == null || id == null) {
+            _duration.value = 0L
+            _progress.value = 0L
+            _lyrics.value = null
             _lyricsOffsetMs.value = 0L
-            
-            viewModelScope.launch {
-                _lyrics.value = id?.let { lyricsRepository.getLyrics(it) }
-            }
+            return
+        }
+
+        _duration.value = controller.duration.coerceAtLeast(0L)
+        _progress.value = controller.currentPosition.coerceAtLeast(0L)
+        _lyricsOffsetMs.value = 0L
+
+        viewModelScope.launch {
+            _lyrics.value = lyricsRepository.getLyrics(id)
         }
     }
 
