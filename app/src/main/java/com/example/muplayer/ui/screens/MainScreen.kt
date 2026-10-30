@@ -74,7 +74,8 @@ fun MainScreen(
                         val navBackStackEntry by navController.currentBackStackEntryAsState()
                         val currentRoute = navBackStackEntry?.destination?.route
                         items.forEach { screen ->
-                            val isSelected = currentRoute == screen.route
+                            // Keep Settings highlighted when its nested Statistics screen is open.
+                            val isSelected = currentRoute == screen.route || (screen == Screen.Settings && currentRoute == "stats")
                             NavigationBarItem(
                                 icon = {
                                     Box(
@@ -128,7 +129,10 @@ fun MainScreen(
         ) { innerPadding ->
             // Use navigation insets properly, removing arbitrary hardcoded background
             Box(modifier = Modifier.padding(innerPadding).fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-                NavigationGraph(navController, viewModel, hasPermission, onRequestPermission)
+                NavigationGraph(
+                    navController, viewModel, hasPermission, onRequestPermission,
+                    modifier = Modifier.fillMaxSize().padding(bottom = if (currentTrack != null) 88.dp else 0.dp)
+                )
                 
                 // Floating Mini Player
                 AnimatedVisibility(
@@ -157,9 +161,10 @@ fun NavigationGraph(
     navController: NavHostController, 
     viewModel: MusicViewModel,
     hasPermission: Boolean,
-    onRequestPermission: () -> Unit
+    onRequestPermission: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    NavHost(navController, startDestination = Screen.Home.route) {
+    NavHost(navController, startDestination = Screen.Home.route, modifier = modifier) {
         composable(Screen.Home.route) {
             HomeScreen(
                 viewModel = viewModel,
