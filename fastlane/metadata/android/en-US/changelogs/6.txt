@@ -1,0 +1,6 @@
+* Fixed custom equalizer slider touch targets and small-screen clipping by using horizontal bands in a scrollable dialog.
+* Kept equalizer preset selection synchronized with the playback service.
+* Prevented the floating mini-player from covering the bottom of screen content.
+* Fixed Settings-tab selection when opening listening statistics.
+* Made the default-sort selection dialog close after choosing an option.
+* Added automated unit-test / debug-APK build checks and a tag-triggered release workflow.
