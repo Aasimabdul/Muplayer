@@ -326,31 +326,57 @@ fun PermissionDeniedState(onRequestPermission: () -> Unit) {
 
 @Composable
 fun HomeHeader() {
+    val accent = MaterialTheme.colorScheme.primary
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 12.dp)
-            .semantics { contentDescription = "Home Header" },
+            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .uniqueLiquidDisplay(
+                shape = RoundedCornerShape(26.dp),
+                accentColor = accent
+            )
+            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .semantics { contentDescription = "MuPlayer Home Hero" },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                "Welcome to",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                "YOUR MUSIC, YOUR SPACE",
+                style = MaterialTheme.typography.labelMedium,
+                color = accent,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp
             )
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("Mu")
-                    }
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground)) {
-                        append("Player")
-                    }
+                    withStyle(style = SpanStyle(color = accent)) { append("Mu") }
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground)) { append("Player") }
                 },
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "Your library. Your vibe. Always yours.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Box(
+            modifier = Modifier
+                .size(58.dp)
+                .background(accent.copy(alpha = 0.14f), CircleShape)
+                .border(1.dp, accent.copy(alpha = 0.55f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.GraphicEq,
+                contentDescription = "MuPlayer equalizer",
+                tint = accent,
+                modifier = Modifier.size(32.dp)
             )
         }
     }
