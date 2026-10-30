@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - fix/v6-package-name
 
 permissions:
   contents: read
@@ -31,3 +32,11 @@ jobs:
 
       - name: Run unit tests and build debug APK
         run: bash ./gradlew testDebugUnitTest assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MuPlayer-V6-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
