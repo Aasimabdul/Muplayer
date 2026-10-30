@@ -5,10 +5,13 @@ on:
   push:
     branches:
       - main
-      - "fix/ui-selection-and-touch-targets"
 
 permissions:
   contents: read
+
+concurrency:
+  group: android-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
