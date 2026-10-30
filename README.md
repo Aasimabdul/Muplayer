@@ -1,42 +1,42 @@
 # MuPlayer
 
-MuPlayer is a sleek, modern, and open-source local music player for Android, designed with a beautiful dark navy theme and built on Jetpack Compose and AndroidX Media3.
+MuPlayer is a privacy-first Android music player for local audio, built with Kotlin, Jetpack Compose, AndroidX Media3, Room, and DataStore.
 
 ## Features
-- **Premium Dark Navy UI:** Clean, responsive, and distraction-free interface.
-- **Local Audio Support:** Automatically scans your Android device for local music (MP3, M4A, etc.) using MediaStore.
-- **Background Playback:** Seamless playback with lock screen and notification controls powered by MediaSessionService.
-- **Favorites & DataStore:** Save your favorite tracks locally without needing a cloud account.
-- **Privacy First:** No internet permission required. Your data never leaves your device.
-- **No Ads, No Trackers:** 100% Free and Open Source Software (FOSS).
+
+- **Local music library:** Scan and play audio stored on the device.
+- **Background playback:** Media session, notification and lock-screen controls.
+- **Playback controls:** Seek, shuffle, repeat, and independent in-app volume.
+- **Library tools:** Search, sorting, favorites, multi-select, and tag editing.
+- **Playlists:** Create and manage playlists, smart Liked Songs / Most Played lists, and import M3U/M3U8 files.
+- **Audio tools:** Equalizer presets, custom 5-band EQ, and bass boost where the device supports them.
+- **Personalization:** Ten color themes, optional Liquid Glass styling, and animation settings.
+- **Lyrics and sleep timer:** Import local lyrics and schedule playback to stop.
+- **Home-screen widgets:** Playback controls and track information.
+- **Privacy-first design:** No account is required; music and app preferences are stored locally. The app manifest does not request the Internet permission.
 
 ## Requirements
-- Android 8.0 (API level 26) or higher.
 
-## Permissions
-- `READ_MEDIA_AUDIO` / `READ_EXTERNAL_STORAGE`: Required strictly to scan and play the audio files stored on your device.
-- `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK`: Required to continue playing music and show playback controls when the app is in the background.
+- Android 8.0 (API 26) or newer.
+- Audio access permission to scan local music.
+- Notification permission on Android 13+ for playback notifications.
 
-## Build Instructions
-This project can be built using standard Android Studio or Gradle wrappers. No proprietary secrets or external configuration files are needed.
+## Build and test
 
-**To build a debug APK:**
+Use JDK 17 and the included Gradle wrapper:
+
 ```bash
-./gradlew assembleDebug
-```
-The output APK will be located at: `app/build/outputs/apk/debug/app-debug.apk`
-
-**To build a signed release APK:**
-You will need to configure your own Keystore inside `build.gradle.kts` (or provide it via environment variables) and run:
-```bash
-./gradlew assembleRelease
+./gradlew testDebugUnitTest assembleDebug
 ```
 
-## Known Limitations
-- "Playlists" and specific "Settings" panels are currently marked as "Coming Soon" in the UI and are placeholders for future development.
-- Folder browsing is not yet fully implemented.
-- Lyrics reader and Equalizer controls are planned but not yet implemented.
+The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
+
+For a locally installable release variant, run `./gradlew assembleRelease`. This repository does not configure a production signing key, so configure your own secure signing setup before distributing a signed production APK.
+
+## Release verification
+
+The GitHub Actions workflow runs unit tests and assembles the debug APK. A tagged release is published only after the release workflow's build and unit-test step succeeds. UI behavior still needs testing on real Android devices, particularly permissions, audio effects, media notifications, and touch interactions.
 
 ## License
-This project is licensed under the [GNU General Public License v3.0](LICENSE). 
-You are free to use, modify, and distribute this software under the terms of the GPL-3.0 license.
+
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
