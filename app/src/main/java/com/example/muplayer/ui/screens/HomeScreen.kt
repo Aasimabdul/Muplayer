@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.muplayer.model.AudioTrack
+import com.example.muplayer.ui.components.AddToPlaylistDialog
 import com.example.muplayer.ui.theme.GlassSurface
 import com.example.muplayer.ui.theme.liquidGlass
 import com.example.muplayer.ui.theme.uniqueLiquidDisplay
@@ -60,6 +61,15 @@ fun HomeScreen(
     val isPlaying by viewModel.isPlaying.collectAsState()
 
     var expandedSection by remember { mutableStateOf<String?>(null) }
+    var tracksToAddToPlaylist by remember { mutableStateOf<List<AudioTrack>?>(null) }
+
+    tracksToAddToPlaylist?.let { selectedTracks ->
+        AddToPlaylistDialog(
+            tracks = selectedTracks,
+            viewModel = viewModel,
+            onDismiss = { tracksToAddToPlaylist = null }
+        )
+    }
 
     if (!hasPermission) {
         PermissionDeniedState(onRequestPermission)
@@ -125,14 +135,16 @@ fun HomeScreen(
                             playCount = count,
                             isFavorite = favoriteIds.contains(track.id),
                             onFavoriteToggle = { viewModel.toggleFavorite(track.id) },
-                            onClick = { viewModel.playTrack(track, queue = listToDisplay) }
+                            onClick = { viewModel.playTrack(track, queue = listToDisplay) },
+                            onAddToPlaylist = { tracksToAddToPlaylist = listOf(track) }
                         )
                     } else {
                         TrackItem(
                             track = track,
                             isFavorite = favoriteIds.contains(track.id),
                             onFavoriteToggle = { viewModel.toggleFavorite(track.id) },
-                            onClick = { viewModel.playTrack(track, queue = listToDisplay) }
+                            onClick = { viewModel.playTrack(track, queue = listToDisplay) },
+                            onAddToPlaylist = { tracksToAddToPlaylist = listOf(track) }
                         )
                     }
                 }
@@ -179,7 +191,8 @@ fun HomeScreen(
                             track = track,
                             isFavorite = true,
                             onFavoriteToggle = { viewModel.toggleFavorite(track.id) },
-                            onClick = { viewModel.playTrack(track, queue = favoriteTracks) }
+                            onClick = { viewModel.playTrack(track, queue = favoriteTracks) },
+                            onAddToPlaylist = { tracksToAddToPlaylist = listOf(track) }
                         )
                     }
                 }
@@ -204,7 +217,8 @@ fun HomeScreen(
                             track = track,
                             isFavorite = favoriteIds.contains(track.id),
                             onFavoriteToggle = { viewModel.toggleFavorite(track.id) },
-                            onClick = { viewModel.playTrack(track, queue = recentlyPlayed) }
+                            onClick = { viewModel.playTrack(track, queue = recentlyPlayed) },
+                            onAddToPlaylist = { tracksToAddToPlaylist = listOf(track) }
                         )
                     }
                 }
@@ -238,7 +252,8 @@ fun HomeScreen(
                             playCount = count,
                             isFavorite = favoriteIds.contains(track.id),
                             onFavoriteToggle = { viewModel.toggleFavorite(track.id) },
-                            onClick = { viewModel.playTrack(track, queue = topTracksToDisplay) }
+                            onClick = { viewModel.playTrack(track, queue = topTracksToDisplay) },
+                            onAddToPlaylist = { tracksToAddToPlaylist = listOf(track) }
                         )
                     }
                 }
@@ -263,7 +278,8 @@ fun HomeScreen(
                             track = track,
                             isFavorite = favoriteIds.contains(track.id),
                             onFavoriteToggle = { viewModel.toggleFavorite(track.id) },
-                            onClick = { viewModel.playTrack(track, queue = recentlyAdded) }
+                            onClick = { viewModel.playTrack(track, queue = recentlyAdded) },
+                            onAddToPlaylist = { tracksToAddToPlaylist = listOf(track) }
                         )
                     }
                 }
@@ -310,31 +326,57 @@ fun PermissionDeniedState(onRequestPermission: () -> Unit) {
 
 @Composable
 fun HomeHeader() {
+    val accent = MaterialTheme.colorScheme.primary
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 12.dp)
-            .semantics { contentDescription = "Home Header" },
+            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .uniqueLiquidDisplay(
+                shape = RoundedCornerShape(26.dp),
+                accentColor = accent
+            )
+            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .semantics { contentDescription = "MuPlayer Home Hero" },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                "Welcome to",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                "YOUR MUSIC, YOUR SPACE",
+                style = MaterialTheme.typography.labelMedium,
+                color = accent,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp
             )
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("Mu")
-                    }
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground)) {
-                        append("Player")
-                    }
+                    withStyle(style = SpanStyle(color = accent)) { append("Mu") }
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground)) { append("Player") }
                 },
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "Your library. Your vibe. Always yours.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Box(
+            modifier = Modifier
+                .size(58.dp)
+                .background(accent.copy(alpha = 0.14f), CircleShape)
+                .border(1.dp, accent.copy(alpha = 0.55f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.GraphicEq,
+                contentDescription = "MuPlayer equalizer",
+                tint = accent,
+                modifier = Modifier.size(32.dp)
             )
         }
     }
@@ -493,7 +535,8 @@ fun SquareTrackCard(
     track: AudioTrack,
     isFavorite: Boolean = false,
     onFavoriteToggle: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAddToPlaylist: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -527,6 +570,21 @@ fun SquareTrackCard(
                     modifier = Modifier.size(16.dp)
                 )
             }
+            IconButton(
+                onClick = onAddToPlaylist,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(4.dp)
+                    .size(28.dp)
+                    .background(Color.Black.copy(alpha = 0.58f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.PlaylistAdd,
+                    contentDescription = "Add to Playlist",
+                    tint = Color.White,
+                    modifier = Modifier.size(17.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -554,7 +612,8 @@ fun RankTrackItem(
     playCount: Int,
     isFavorite: Boolean,
     onFavoriteToggle: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAddToPlaylist: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -599,6 +658,13 @@ fun RankTrackItem(
                 overflow = TextOverflow.Ellipsis
             )
         }
+        IconButton(onClick = onAddToPlaylist) {
+            Icon(
+                imageVector = Icons.Filled.PlaylistAdd,
+                contentDescription = "Add to Playlist",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
         IconButton(onClick = onFavoriteToggle) {
             Icon(
                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
@@ -614,7 +680,8 @@ fun TrackItem(
     track: AudioTrack,
     isFavorite: Boolean = false,
     onFavoriteToggle: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAddToPlaylist: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -649,6 +716,13 @@ fun TrackItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+        IconButton(onClick = onAddToPlaylist) {
+            Icon(
+                imageVector = Icons.Filled.PlaylistAdd,
+                contentDescription = "Add to Playlist",
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         IconButton(onClick = onFavoriteToggle) {

@@ -10,7 +10,8 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.simbuild.Muplayer"
+        // Keep the installed Android package ID consistently lowercase.
+        applicationId = "com.simbuild.muplayer"
         minSdk = 26
         targetSdk = 35
         versionCode = 6

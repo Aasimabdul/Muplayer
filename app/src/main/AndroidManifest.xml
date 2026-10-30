@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name=".MuPlayerApp"
+        android:name="com.example.muplayer.MuPlayerApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MuPlayer">
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.muplayer.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MuPlayer"
@@ -30,7 +30,7 @@
         </activity>
 
         <service
-            android:name=".service.PlaybackService"
+            android:name="com.example.muplayer.service.PlaybackService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="true">
             <intent-filter>
@@ -38,9 +38,8 @@
             </intent-filter>
         </service>
 
-        <!-- App Widgets -->
         <receiver
-            android:name=".widget.MuPlayerWidgetCompactProvider"
+            android:name="com.example.muplayer.widget.MuPlayerWidgetCompactProvider"
             android:exported="true"
             android:label="MuPlayer Compact (2×2)">
             <intent-filter>
@@ -49,13 +48,11 @@
                 <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
                 <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_compact_info" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_compact_info" />
         </receiver>
 
         <receiver
-            android:name=".widget.MuPlayerWidgetWideProvider"
+            android:name="com.example.muplayer.widget.MuPlayerWidgetWideProvider"
             android:exported="true"
             android:label="MuPlayer Wide (4×1)">
             <intent-filter>
@@ -64,13 +61,11 @@
                 <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
                 <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_wide_info" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_wide_info" />
         </receiver>
 
         <receiver
-            android:name=".widget.MuPlayerWidgetExpandedProvider"
+            android:name="com.example.muplayer.widget.MuPlayerWidgetExpandedProvider"
             android:exported="true"
             android:label="MuPlayer Expanded (4×2)">
             <intent-filter>
@@ -79,9 +74,7 @@
                 <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
                 <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_expanded_info" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_expanded_info" />
         </receiver>
     </application>
 
