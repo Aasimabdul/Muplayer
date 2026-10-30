@@ -1,6 +1,9 @@
 package com.example.muplayer.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -68,8 +71,8 @@ fun AddToPlaylistDialog(
                         Button(
                             enabled = newName.isNotBlank(),
                             onClick = {
-                                viewModel.createPlaylist(newName.trim(), tracks.map { it.id })
-                                onDismiss()
+                                val job = viewModel.createPlaylist(newName.trim(), tracks.map { it.id })
+                                job.invokeOnCompletion { onDismiss() }
                             }
                         ) {
                             Text("Create & Add")
@@ -102,18 +105,41 @@ fun AddToPlaylistDialog(
                     } else {
                         LazyColumn(modifier = Modifier.heightIn(max = 240.dp)) {
                             items(playlists, key = { it.id }) { playlist ->
-                                Text(
-                                    text = playlist.name,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    style = MaterialTheme.typography.bodyLarge,
+                                Surface(
+                                    onClick = {
+                                        val job = viewModel.addTracksToPlaylist(playlist.id, tracks.map { it.id })
+                                        job.invokeOnCompletion { onDismiss() }
+                                    },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable {
-                                            viewModel.addTracksToPlaylist(playlist.id, tracks.map { it.id })
-                                            onDismiss()
-                                        }
-                                        .padding(vertical = 14.dp, horizontal = 16.dp)
-                                )
+                                        .padding(vertical = 4.dp),
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 13.dp),
+                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.PlaylistPlay,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Text(
+                                            text = playlist.name,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.SemiBold,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Text(
+                                            text = "${playlist.trackIds.size} songs",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
