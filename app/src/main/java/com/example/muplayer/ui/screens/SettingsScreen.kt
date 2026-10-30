@@ -296,10 +296,10 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Column {
-                        SortOptionItem("TITLE", "Title", defaultSort, viewModel)
-                        SortOptionItem("ARTIST", "Artist", defaultSort, viewModel)
-                        SortOptionItem("RECENTLY_ADDED", "Recently Added", defaultSort, viewModel)
-                        SortOptionItem("DURATION", "Duration", defaultSort, viewModel)
+                        SortOptionItem("TITLE", "Title", defaultSort, viewModel) { showSortDialog = false }
+                        SortOptionItem("ARTIST", "Artist", defaultSort, viewModel) { showSortDialog = false }
+                        SortOptionItem("RECENTLY_ADDED", "Recently Added", defaultSort, viewModel) { showSortDialog = false }
+                        SortOptionItem("DURATION", "Duration", defaultSort, viewModel) { showSortDialog = false }
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -1213,11 +1213,17 @@ fun ColorSwatchDot(color: Color) {
 }
 
 @Composable
-fun SortOptionItem(id: String, name: String, currentSort: String, viewModel: MusicViewModel) {
+fun SortOptionItem(
+    id: String,
+    name: String,
+    currentSort: String,
+    viewModel: MusicViewModel,
+    onSelected: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { viewModel.setDefaultSort(id) }
+            .clickable { viewModel.setDefaultSort(id); onSelected() }
             .padding(vertical = 12.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
