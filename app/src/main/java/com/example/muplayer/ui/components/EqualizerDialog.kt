@@ -1,6 +1,8 @@
 package com.example.muplayer.ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -22,7 +23,9 @@ fun EqualizerDialog(onDismiss: () -> Unit) {
     val bassBoostStrength by PlaybackService.bassBoostStrength.collectAsState()
     val customEqBands by PlaybackService.customEqBands.collectAsState()
 
-    var activePreset by remember { mutableStateOf(PlaybackService.currentEqPreset.value) }
+    val currentEqPreset by PlaybackService.currentEqPreset.collectAsState()
+    var activePreset by remember { mutableStateOf(currentEqPreset) }
+    LaunchedEffect(currentEqPreset) { activePreset = currentEqPreset }
 
     val presets = listOf(
         "Custom", "Normal", "Classical", "Dance", "Flat", "Folk",
@@ -33,6 +36,7 @@ fun EqualizerDialog(onDismiss: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(max = 600.dp)
                 .uniqueLiquidDisplay(
                     shape = RoundedCornerShape(28.dp),
                     accentColor = MaterialTheme.colorScheme.primary
@@ -40,7 +44,7 @@ fun EqualizerDialog(onDismiss: () -> Unit) {
                 .padding(20.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Header
@@ -103,62 +107,51 @@ fun EqualizerDialog(onDismiss: () -> Unit) {
                         fontWeight = FontWeight.SemiBold
                     )
                     
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         for (band in 0 until 5) {
                             val bandId = band.toShort()
                             val level = customEqBands[bandId] ?: 0.toShort()
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
+                            val bandLabel = when (band) {
+                                0 -> "60 Hz"
+                                1 -> "230 Hz"
+                                2 -> "910 Hz"
+                                3 -> "3 kHz"
+                                else -> "14 kHz"
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Slider(
-                                        value = level.toFloat(),
-                                        onValueChange = { newVal ->
-                                            val newBands = customEqBands.toMutableMap()
-                                            newBands[bandId] = newVal.toInt().toShort()
-                                            PlaybackService.customEqBands.value = newBands
-                                        },
-                                        valueRange = -1500f..1500f,
-                                        enabled = isEqEnabled,
-                                        colors = SliderDefaults.colors(
-                                            thumbColor = MaterialTheme.colorScheme.primary,
-                                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                                            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                                        ),
-                                        modifier = Modifier
-                                            .requiredWidth(140.dp) // The length of the slider
-                                            .graphicsLayer {
-                                                rotationZ = -90f
-                                                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.5f)
-                                            }
-                                    )
-                                }
                                 Text(
-                                    text = when(band) {
-                                        0 -> "60Hz"
-                                        1 -> "230Hz"
-                                        2 -> "910Hz"
-                                        3 -> "3kHz"
-                                        4 -> "14kHz"
-                                        else -> ""
+                                    text = bandLabel,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.width(58.dp)
+                                )
+                                Slider(
+                                    value = level.toFloat().coerceIn(-1500f, 1500f),
+                                    onValueChange = { newVal ->
+                                        val newBands = customEqBands.toMutableMap()
+                                        newBands[bandId] = newVal.toInt().toShort()
+                                        PlaybackService.customEqBands.value = newBands
                                     },
+                                    valueRange = -1500f..1500f,
+                                    enabled = isEqEnabled,
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = MaterialTheme.colorScheme.primary,
+                                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                                    ),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    text = "${level} mB",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(top = 8.dp)
+                                    modifier = Modifier.width(48.dp)
                                 )
                             }
                         }
