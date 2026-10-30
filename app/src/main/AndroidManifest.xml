@@ -38,7 +38,6 @@
             </intent-filter>
         </service>
 
-        <!-- App Widgets -->
         <receiver
             android:name="com.example.muplayer.widget.MuPlayerWidgetCompactProvider"
             android:exported="true"
@@ -49,9 +48,7 @@
                 <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
                 <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_compact_info" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_compact_info" />
         </receiver>
 
         <receiver
@@ -64,9 +61,7 @@
                 <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
                 <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_wide_info" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_wide_info" />
         </receiver>
 
         <receiver
@@ -75,11 +70,11 @@
             android:label="MuPlayer Expanded (4×2)">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_PLAY_PAUSE" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_NEXT" />
+                <action android:name="com.simbuild.muplayer.widget.ACTION_PREVIOUS" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_expanded_info" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_expanded_info" />
         </receiver>
     </application>
 
