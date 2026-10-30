@@ -639,13 +639,6 @@ fun RankTrackItem(
                 tint = MaterialTheme.colorScheme.primary
             )
         }
-        IconButton(onClick = onAddToPlaylist) {
-            Icon(
-                imageVector = Icons.Filled.PlaylistAdd,
-                contentDescription = "Add to Playlist",
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
         IconButton(onClick = onFavoriteToggle) {
             Icon(
                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
@@ -697,6 +690,13 @@ fun TrackItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+        IconButton(onClick = onAddToPlaylist) {
+            Icon(
+                imageVector = Icons.Filled.PlaylistAdd,
+                contentDescription = "Add to Playlist",
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         IconButton(onClick = onFavoriteToggle) {
