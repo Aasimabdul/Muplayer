@@ -10,7 +10,9 @@ import androidx.media3.common.Player
 import androidx.media3.common.C
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.media3.session.SessionCommand
 import android.net.Uri
+import android.os.Bundle
 import com.example.muplayer.data.DailyListeningStat
 import com.example.muplayer.data.PlayHistoryEntry
 import com.example.muplayer.data.TopItemCount
@@ -665,19 +667,28 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startSleepTimer(minutes: Int) {
         sleepTimerJob?.cancel()
-        _sleepTimerTimeRemaining.value = minutes * 60 * 1000L
+        val durationMs = minutes * 60 * 1000L
+        _sleepTimerTimeRemaining.value = durationMs
+        val args = Bundle().apply { putLong("duration", durationMs) }
+        mediaController?.sendCustomCommand(
+            SessionCommand(PlaybackService.CMD_START_TIMER, Bundle.EMPTY),
+            args
+        )
         sleepTimerJob = viewModelScope.launch {
-            while ((_sleepTimerTimeRemaining.value ?: 0) > 0) {
-                kotlinx.coroutines.delay(1000)
-                _sleepTimerTimeRemaining.value = (_sleepTimerTimeRemaining.value ?: 0) - 1000
+            while ((_sleepTimerTimeRemaining.value ?: 0L) > 0L) {
+                kotlinx.coroutines.delay(1000L)
+                _sleepTimerTimeRemaining.value = ((_sleepTimerTimeRemaining.value ?: 0L) - 1000L).coerceAtLeast(0L)
             }
             _sleepTimerTimeRemaining.value = null
-            mediaController?.pause()
         }
     }
 
     fun cancelSleepTimer() {
         sleepTimerJob?.cancel()
+        mediaController?.sendCustomCommand(
+            SessionCommand(PlaybackService.CMD_CANCEL_TIMER, Bundle.EMPTY),
+            Bundle.EMPTY
+        )
         _sleepTimerTimeRemaining.value = null
     }
 
