@@ -55,6 +55,12 @@ class MusicRepository(private val context: Context) {
             projection.add(MediaStore.Audio.Media.DATA)
         }
 
+        val excludedFolders = context.getSharedPreferences("muplayer_playback_settings", Context.MODE_PRIVATE)
+            .getString("excluded_folders", "")
+            .orEmpty()
+            .split(",")
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
 
@@ -100,6 +106,8 @@ class MusicRepository(private val context: Context) {
                     folderPath = file.parent ?: ""
                     folderName = file.parentFile?.name ?: "Unknown"
                 }
+
+                if (excludedFolders.any { folderPath.contains(it, ignoreCase = true) || folderName.contains(it, ignoreCase = true) }) continue
 
                 val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
                 val albumArtUri = ContentUris.withAppendedId(artworkUri, albumId)
