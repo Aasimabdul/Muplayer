@@ -47,6 +47,12 @@ fun SettingsScreen(
     onNavigateToStats: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val playbackPrefs = remember { context.getSharedPreferences("muplayer_playback_settings", 0) }
+    var excludedFolders by remember { mutableStateOf(playbackPrefs.getString("excluded_folders", "") ?: "") }
+    var resumeLast by remember { mutableStateOf(playbackPrefs.getBoolean("resume_last", true)) }
+    var rememberQueue by remember { mutableStateOf(playbackPrefs.getBoolean("remember_queue", true)) }
+    val currentTracks by viewModel.tracks.collectAsState()
+    val sleepTimerRemaining by viewModel.sleepTimerTimeRemaining.collectAsState()
     val currentTheme by viewModel.currentTheme.collectAsState()
     val defaultSort by viewModel.defaultSort.collectAsState()
     val isAmbientModeEnabled by viewModel.isAmbientModeEnabled.collectAsState()
@@ -883,7 +889,84 @@ fun SettingsScreen(
 
                 ListItem(
                     headlineContent = { Text("Gapless Playback") },
-                    supportingContent = { Text("Active — Eliminates unwanted silence between tracks") },
+                    supportingContent = { Text("Active — Eliminates unwanted silence between tracks where supported") },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
+                )
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                ListItem(
+                    headlineContent = { Text("Scan Music Library") },
+                    supportingContent = { Text("Rescan device audio files · ${currentTracks.size} tracks currently indexed") },
+                    leadingContent = { Icon(Icons.Filled.Refresh, contentDescription = "Scan library") },
+                    modifier = Modifier.clickable {
+                        viewModel.loadLibrary()
+                        Toast.makeText(context, "Music library scan started", Toast.LENGTH_SHORT).show()
+                    },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
+                )
+
+                ListItem(
+                    headlineContent = { Text("Resume Last Played Song") },
+                    supportingContent = { Text("Restore the last track and playback position on app reopen") },
+                    trailingContent = { Switch(checked = resumeLast, onCheckedChange = {
+                        resumeLast = it
+                        playbackPrefs.edit().putBoolean("resume_last", it).apply()
+                    }) },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
+                )
+
+                ListItem(
+                    headlineContent = { Text("Remember Last Queue") },
+                    supportingContent = { Text("Restore the previous queue when reopening MuPlayer") },
+                    trailingContent = { Switch(checked = rememberQueue, onCheckedChange = {
+                        rememberQueue = it
+                        playbackPrefs.edit().putBoolean("remember_queue", it).apply()
+                    }) },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
+                )
+
+                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text("Excluded Folders", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text("Comma-separated folder names or paths. Applied on the next scan.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    OutlinedTextField(
+                        value = excludedFolders,
+                        onValueChange = { excludedFolders = it },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        label = { Text("e.g. WhatsApp, Podcasts, Recordings") },
+                        minLines = 2
+                    )
+                    Button(onClick = {
+                        playbackPrefs.edit().putString("excluded_folders", excludedFolders).apply()
+                        viewModel.loadLibrary()
+                        Toast.makeText(context, "Folder exclusions saved; library scan started", Toast.LENGTH_SHORT).show()
+                    }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) { Text("Save & Rescan Library") }
+                }
+
+                ListItem(
+                    headlineContent = { Text("Sleep Timer") },
+                    supportingContent = { Text(sleepTimerRemaining?.let { "Active · " + ((it + 59999L) / 60000L) + " min remaining" } ?: "Gradually fade playback before stopping") },
+                    trailingContent = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            listOf(15, 30, 60).forEach { minutes ->
+                                TextButton(onClick = { viewModel.startSleepTimer(minutes); Toast.makeText(context, "Sleep timer: $minutes minutes", Toast.LENGTH_SHORT).show() }) { Text("${minutes}m") }
+                            }
+                            TextButton(onClick = { viewModel.cancelSleepTimer() }) { Text("Off") }
+                        }
+                    },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
+                )
+
+                ListItem(
+                    headlineContent = { Text("Clear Cache & Artwork Cache") },
+                    supportingContent = { Text("Remove temporary cached files; music files and playlists are kept") },
+                    leadingContent = { Icon(Icons.Filled.Refresh, contentDescription = "Clear cache") },
+                    modifier = Modifier.clickable {
+                        val ok = try {
+                            context.cacheDir.listFiles()?.forEach { it.deleteRecursively() }
+                            true
+                        } catch (_: Exception) { false }
+                        Toast.makeText(context, if (ok) "App cache cleared" else "Some cache files could not be removed", Toast.LENGTH_SHORT).show()
+                    },
                     colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
                 )
 
@@ -1051,8 +1134,14 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Bold
                         )
                     },
-                    supportingContent = { Text("Version 1.0.0") },
+                    supportingContent = { Text("Version 6.0.0 · Open-source") },
                     colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
+                )
+                Text(
+                    "Open-source credits: Kotlin, Jetpack Compose, AndroidX Media3, Room, DataStore, Coil and AndroidX Palette. MuPlayer is an open-source project; see the repository LICENSE for terms.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
         }
