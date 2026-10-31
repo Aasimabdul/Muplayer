@@ -40,6 +40,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     private val musicRepository = MusicRepository(application)
     private val dataStoreRepository = DataStoreRepository(application)
+    private val playbackPrefs = application.getSharedPreferences("muplayer_playback_settings", 0)
     private val lyricsRepository = LyricsRepository(application)
 
     private val _tracks = MutableStateFlow<List<AudioTrack>>(emptyList())
@@ -270,8 +271,10 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         
         viewModelScope.launch {
             while (true) {
-                if (_isPlaying.value) {
-                    updateProgress()
+                if (_isPlaying.value) updateProgress()
+                val current = _currentTrack.value
+                if (current != null && playbackPrefs.getBoolean("resume_last", true)) {
+                    playbackPrefs.edit().putLong("last_track_id", current.id).putLong("last_position_ms", _progress.value).apply()
                 }
                 kotlinx.coroutines.delay(500L)
             }
@@ -305,6 +308,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             mediaController?.addListener(playerListener)
             _appVolume.value = mediaController?.volume ?: 1f
             updatePlaybackState()
+            restoreLastPlayback()
         }, MoreExecutors.directExecutor())
     }
 
@@ -362,6 +366,10 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     fun playTrack(track: AudioTrack, queue: List<AudioTrack> = _tracks.value) {
         mediaController?.let { controller ->
             _currentQueue.value = queue
+            playbackPrefs.edit().putLong("last_track_id", track.id).apply()
+            if (playbackPrefs.getBoolean("remember_queue", true)) {
+                playbackPrefs.edit().putString("queue_track_ids", queue.joinToString(",") { it.id.toString() }).apply()
+            }
             val startIndex = queue.indexOfFirst { it.id == track.id }.coerceAtLeast(0)
             val mediaItems = queue.map { audioTrack ->
                 MediaItem.Builder()
@@ -380,6 +388,40 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             controller.setMediaItems(mediaItems, startIndex, C.TIME_UNSET)
             controller.prepare()
             controller.play()
+        }
+    }
+
+    private fun restoreLastPlayback() {
+        viewModelScope.launch {
+            if (!playbackPrefs.getBoolean("resume_last", true)) return@launch
+            var attempts = 0
+            while (_tracks.value.isEmpty() && attempts < 20) {
+                kotlinx.coroutines.delay(250L)
+                attempts++
+            }
+            val allTracks = _tracks.value
+            if (allTracks.isEmpty()) return@launch
+            val savedTrackId = playbackPrefs.getLong("last_track_id", -1L)
+            val ids = if (playbackPrefs.getBoolean("remember_queue", true)) {
+                playbackPrefs.getString("queue_track_ids", "").orEmpty().split(",").mapNotNull { it.toLongOrNull() }
+            } else listOf(savedTrackId)
+            val queue = ids.mapNotNull { id -> allTracks.find { it.id == id } }.distinctBy { it.id }
+                .ifEmpty { allTracks.filter { it.id == savedTrackId } }
+            val trackIndex = queue.indexOfFirst { it.id == savedTrackId }.coerceAtLeast(0)
+            val controller = mediaController ?: return@launch
+            if (queue.isNotEmpty()) {
+                val items = queue.map { track ->
+                    MediaItem.Builder()
+                        .setMediaId(track.id.toString())
+                        .setUri(track.uri)
+                        .setMediaMetadata(MediaMetadata.Builder().setTitle(track.title).setArtist(track.artist).setAlbumTitle(track.album).setArtworkUri(track.albumArtUri).build())
+                        .build()
+                }
+                _currentQueue.value = queue
+                controller.setMediaItems(items, trackIndex, playbackPrefs.getLong("last_position_ms", 0L).coerceAtLeast(0L))
+                controller.prepare()
+                updatePlaybackState()
+            }
         }
     }
 
