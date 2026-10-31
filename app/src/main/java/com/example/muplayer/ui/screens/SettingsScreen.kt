@@ -1134,7 +1134,7 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Bold
                         )
                     },
-                    supportingContent = { Text("Version 6.0.0 · Open-source") },
+                    supportingContent = { Text("Version 6.1.0 · Open-source") },
                     colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
                 )
                 Text(
