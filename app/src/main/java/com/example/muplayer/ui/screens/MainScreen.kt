@@ -164,7 +164,35 @@ fun NavigationGraph(
     onRequestPermission: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    NavHost(navController, startDestination = Screen.Home.route, modifier = modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Home.route,
+        modifier = modifier,
+        enterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { width -> width / 16 },
+                animationSpec = tween(210)
+            ) + fadeIn(animationSpec = tween(210))
+        },
+        exitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { width -> -width / 24 },
+                animationSpec = tween(180)
+            ) + fadeOut(animationSpec = tween(180))
+        },
+        popEnterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { width -> -width / 24 },
+                animationSpec = tween(190)
+            ) + fadeIn(animationSpec = tween(190))
+        },
+        popExitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { width -> width / 16 },
+                animationSpec = tween(170)
+            ) + fadeOut(animationSpec = tween(170))
+        }
+    ) {
         composable(Screen.Home.route) {
             HomeScreen(
                 viewModel = viewModel,
