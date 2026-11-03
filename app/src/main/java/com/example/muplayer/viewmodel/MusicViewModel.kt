@@ -279,13 +279,13 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
                 val current = _currentTrack.value
                 val now = android.os.SystemClock.elapsedRealtime()
-                val shouldPersistResumePosition = current != null &&
+                if (
+                    current != null &&
                     playbackPrefs.getBoolean("resume_last", true) &&
                     (current.id != lastPersistedTrackId || now - lastPersistedAtMs >= 5_000L)
-
-                if (shouldPersistResumePosition) {
+                ) {
                     playbackPrefs.edit()
-                        .putLong("last_track_id", current!!.id)
+                        .putLong("last_track_id", current.id)
                         .putLong("last_position_ms", _progress.value)
                         .apply()
                     lastPersistedTrackId = current.id
