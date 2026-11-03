@@ -272,11 +272,24 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         viewModelScope.launch {
+            var lastPersistedTrackId = Long.MIN_VALUE
+            var lastPersistedAtMs = 0L
             while (true) {
                 if (_isPlaying.value) updateProgress()
+
                 val current = _currentTrack.value
-                if (current != null && playbackPrefs.getBoolean("resume_last", true)) {
-                    playbackPrefs.edit().putLong("last_track_id", current.id).putLong("last_position_ms", _progress.value).apply()
+                val now = android.os.SystemClock.elapsedRealtime()
+                if (
+                    current != null &&
+                    playbackPrefs.getBoolean("resume_last", true) &&
+                    (current.id != lastPersistedTrackId || now - lastPersistedAtMs >= 5_000L)
+                ) {
+                    playbackPrefs.edit()
+                        .putLong("last_track_id", current.id)
+                        .putLong("last_position_ms", _progress.value)
+                        .apply()
+                    lastPersistedTrackId = current.id
+                    lastPersistedAtMs = now
                 }
                 kotlinx.coroutines.delay(500L)
             }

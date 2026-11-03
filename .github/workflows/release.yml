@@ -1,17 +1,15 @@
-name: Publish MuPlayer release
+name: Publish MuPlayer production release
 
 on:
   push:
-    branches:
-      - main
     tags:
-      - "V.6.1.0"
+      - "V.*"
   workflow_dispatch:
     inputs:
       tag_name:
-        description: "Release tag to publish"
+        description: "Existing MuPlayer release tag to build and publish"
         required: true
-        default: "V.6.1.0"
+        default: "V.6.2.0"
         type: string
 
 permissions:
@@ -21,72 +19,96 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-
-      - name: Check release version and avoid duplicate release
-        id: release-check
+      - name: Select release tag
+        id: release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_TAG: ${{ inputs.tag_name }}
           EVENT_NAME: ${{ github.event_name }}
-          INPUT_TAG: ${{ github.event.inputs.tag_name }}
           REF_NAME: ${{ github.ref_name }}
         run: |
-          VERSION=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts)
-          if [[ "$VERSION" != "6.1.0" ]]; then
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
-            echo "This commit is not MuPlayer 6.1.0; skipping release."
-            exit 0
-          fi
-          TAG_NAME="$REF_NAME"
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then TAG_NAME="$INPUT_TAG"; fi
-          if [[ "$EVENT_NAME" == "push" && "$REF_NAME" == "main" ]]; then TAG_NAME="V.6.1.0"; fi
-          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
-            echo "Release $TAG_NAME already exists; skipping."
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            TAG_NAME="$INPUT_TAG"
           else
-            echo "should_release=true" >> "$GITHUB_OUTPUT"
-            echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
-            echo "tag_exists=false" >> "$GITHUB_OUTPUT"
-            if [[ "$EVENT_NAME" == "push" && "$REF_NAME" == "V.6.1.0" ]]; then
-              echo "tag_exists=true" >> "$GITHUB_OUTPUT"
-            fi
+            TAG_NAME="$REF_NAME"
           fi
+          if [[ ! "$TAG_NAME" =~ ^V\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Unsupported release tag: $TAG_NAME"
+            exit 1
+          fi
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the tagged source
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ steps.release.outputs.tag_name }}
+
+      - name: Validate version and signing secrets
+        env:
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts)
+          if [[ "$TAG_NAME" != "V.$VERSION" ]]; then
+            echo "Tag $TAG_NAME does not match app version $VERSION"
+            exit 1
+          fi
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "Missing required repository secret: $name"
+              echo "Refusing to publish an unsigned or debug APK."
+              exit 1
+            fi
+          done
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "A release already exists for $TAG_NAME; refusing to overwrite it."
+            exit 1
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/muplayer-release.jks"
+          test -s "$RUNNER_TEMP/muplayer-release.jks"
 
       - name: Set up JDK 17
-        if: steps.release-check.outputs.should_release == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - name: Set up Gradle
-        if: steps.release-check.outputs.should_release == 'true'
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run tests and build APK
-        if: steps.release-check.outputs.should_release == 'true'
-        run: bash ./gradlew testDebugUnitTest assembleDebug
+      - name: Run unit tests and lint
+        run: |
+          bash ./gradlew testDebugUnitTest
+          bash ./gradlew lintRelease
 
-      - name: Name release APK
-        if: steps.release-check.outputs.should_release == 'true'
-        run: cp app/build/outputs/apk/debug/app-debug.apk MuPlayer_V.6.1.0.apk
+      - name: Build signed production APK
+        env:
+          ORG_GRADLE_PROJECT_RELEASE_STORE_FILE: ${{ runner.temp }}/muplayer-release.jks
+          ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: bash ./gradlew assembleRelease
 
-      - name: Publish GitHub release
-        if: steps.release-check.outputs.should_release == 'true'
+      - name: Verify APK signature and package
+        run: |
+          APK="app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
+          cp "$APK" "MuPlayer_${{ steps.release.outputs.tag_name }}.apk"
+          sha256sum "MuPlayer_${{ steps.release.outputs.tag_name }}.apk" > SHA256SUMS.txt
+
+      - name: Publish verified production release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG_NAME: ${{ steps.release-check.outputs.tag_name }}
-          TAG_EXISTS: ${{ steps.release-check.outputs.tag_exists }}
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
         run: |
-          if [[ "$TAG_EXISTS" == "true" ]]; then
-            gh release create "$TAG_NAME" MuPlayer_V.6.1.0.apk \
-              --verify-tag \
-              --title "MuPlayer $TAG_NAME" \
-              --notes-file release_notes.md
-          else
-            gh release create "$TAG_NAME" MuPlayer_V.6.1.0.apk \
-              --target "$GITHUB_SHA" \
-              --title "MuPlayer $TAG_NAME" \
-              --notes-file release_notes.md
-          fi
+          gh release create "$TAG_NAME" "MuPlayer_$TAG_NAME.apk" SHA256SUMS.txt \
+            --verify-tag \
+            --title "MuPlayer $TAG_NAME" \
+            --notes-file release_notes.md

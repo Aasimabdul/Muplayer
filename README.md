@@ -26,16 +26,32 @@ MuPlayer is a privacy-first Android music player for local audio, built with Kot
 Use JDK 17 and the included Gradle wrapper:
 
 ```bash
-./gradlew testDebugUnitTest assembleDebug
+bash ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
 The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
 
-For a locally installable release variant, run `./gradlew assembleRelease`. This repository does not configure a production signing key, so configure your own secure signing setup before distributing a signed production APK.
+A production release must be signed with the established project keystore. The release build reads these Gradle properties (never commit their values):
 
-## Release verification
+- `RELEASE_STORE_FILE`
+- `RELEASE_STORE_PASSWORD`
+- `RELEASE_KEY_ALIAS`
+- `RELEASE_KEY_PASSWORD`
 
-The GitHub Actions workflow runs unit tests and assembles the debug APK. A tagged release is published only after the release workflow's build and unit-test step succeeds. UI behavior still needs testing on real Android devices, particularly permissions, audio effects, media notifications, and touch interactions.
+## GitHub Actions and production releases
+
+The Android CI workflow runs unit tests, Android lint, and a debug assembly for pull requests and development branches. Its debug APK is a CI artifact only and is not a production release.
+
+The production release workflow refuses to publish unless all of these repository Actions secrets are configured using the project's authorized signing keystore:
+
+- `ANDROID_KEYSTORE_BASE64` — base64-encoded keystore file
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+Push a version tag matching the Gradle `versionName` (for example, `V.6.2.0`) only after tests pass and the correct signing key is available. The workflow builds `assembleRelease`, verifies the APK signature, publishes the APK and a SHA-256 checksum, and refuses to overwrite an existing release. Do not use a debug APK for production distribution.
+
+UI behavior still needs testing on real Android devices, particularly permissions, audio effects, media notifications, reduced-motion behavior, and touch interactions.
 
 ## License
 
