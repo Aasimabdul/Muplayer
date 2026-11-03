@@ -82,8 +82,8 @@ jobs:
 
       - name: Run unit tests and lint
         run: |
-          ./gradlew testDebugUnitTest
-          ./gradlew lintRelease
+          bash ./gradlew testDebugUnitTest
+          bash ./gradlew lintRelease
 
       - name: Build signed production APK
         env:
@@ -91,7 +91,7 @@ jobs:
           ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: bash ./gradlew assembleRelease
 
       - name: Verify APK signature and package
         run: |
