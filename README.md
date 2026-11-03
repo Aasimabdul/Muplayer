@@ -26,7 +26,7 @@ MuPlayer is a privacy-first Android music player for local audio, built with Kot
 Use JDK 17 and the included Gradle wrapper:
 
 ```bash
-./gradlew testDebugUnitTest lintDebug assembleDebug
+bash ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
 The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
